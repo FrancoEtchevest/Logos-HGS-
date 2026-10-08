@@ -1,6 +1,8 @@
-"""Genera la música del video (60 s, 120 BPM) de forma determinística.
+"""Genera la música de los videos (120 BPM) de forma determinística.
 
-Estructura (1 compás = 2 s):
+Hay dos estructuras: "horizontal" (60 s, la por defecto) y "reel" (100 s, vertical).
+
+Estructura horizontal (1 compás = 2 s):
   0–4 s   intro: pad + arpegio filtrado + subida      → golpe a los 4 s
   4–16 s  entra la batería
   16–30 s tema completo con palmas                    (preguntas)
@@ -10,7 +12,9 @@ Estructura (1 compás = 2 s):
   52–56 s quiebre: solo pad                           (pregunta final)
   56–60 s golpe final + cierre
 
-Uso: python3 tools/generar_musica.py assets/audio/musica.wav
+Uso:
+  python3 tools/generar_musica.py assets/audio/musica.wav
+  python3 tools/generar_musica.py musica-reel.wav reel
 """
 
 import sys
@@ -23,11 +27,33 @@ SR = 44100
 BPM = 120
 BEAT = 60 / BPM
 BAR = 4 * BEAT
-DUR = 60.0
+
+# Cada estructura: duración, secciones (inicio, fin, tipo), golpes y subidas (inicio, duración, volumen).
+# Tipos: intro (sin batería), a (batería suave), b (completo), c (completo + platillos abiertos),
+# quiebre (solo pad y arpegio), final (golpe y cierre).
+ESTRUCTURAS = {
+    "horizontal": {
+        "dur": 60.0,
+        "secciones": [(0, 4, "intro"), (4, 16, "a"), (16, 30, "b"), (30, 32, "quiebre"), (32, 44, "b"), (44, 52, "c"), (52, 56, "quiebre"), (56, 60, "final")],
+        "golpes": [4, 8, 16, 32, 44, 52, 56],
+        "fuertes": [4, 32, 56],
+        "subidas": [(0, 4, 0.8), (30, 2, 0.9), (52, 4, 0.7), (15, 1, 0.5), (43, 1, 0.5)],
+    },
+    "reel": {
+        "dur": 100.0,
+        "secciones": [(0, 6, "intro"), (6, 20, "a"), (20, 48, "b"), (48, 52, "quiebre"), (52, 76, "b"), (76, 88, "c"), (88, 94, "quiebre"), (94, 100, "final")],
+        "golpes": [6, 10, 20, 24, 52, 76, 88, 94],
+        "fuertes": [6, 52, 94],
+        "subidas": [(0, 6, 0.8), (48, 4, 0.9), (88, 6, 0.7), (19, 1, 0.5), (75, 1, 0.5)],
+    },
+}
+CFG = ESTRUCTURAS[sys.argv[2] if len(sys.argv) > 2 else "horizontal"]
+DUR = CFG["dur"]
 N = int(SR * DUR)
+FIN = CFG["secciones"][-1][0]  # comienzo del cierre
 rng = np.random.default_rng(7)
 
-GOLPES = [4, 8, 16, 32, 44, 52, 56]
+GOLPES = CFG["golpes"]
 
 
 def midi(n):
@@ -146,26 +172,17 @@ K, C, H, HO = kick(), clap(), hat(), hat(True)
 
 
 def seccion(t):
-    if t < 4:
-        return "intro"
-    if t < 16:
-        return "a"
-    if 30 <= t < 32:
-        return "quiebre"
-    if 52 <= t < 56:
-        return "quiebre"
-    if t >= 56:
-        return "final"
-    if 44 <= t < 52:
-        return "c"
-    return "b"
+    for ini, fin, tipo in CFG["secciones"]:
+        if ini <= t < fin:
+            return tipo
+    return "final"
 
 
 n_beats = int(DUR / BEAT)
 for b in range(n_beats):
     t = b * BEAT
     s = seccion(t)
-    if s in ("a", "b", "c", "final") and not (s == "final" and t >= 58):
+    if s in ("a", "b", "c", "final") and not (s == "final" and t >= FIN + 2):
         put(drums, K, t, 1.0)
         k = int(t * SR)
         m = int(0.25 * SR)
@@ -183,7 +200,7 @@ eighth = BEAT / 2
 for i in range(int(DUR / eighth)):
     t = i * eighth
     s = seccion(t)
-    if s in ("a", "b", "c", "final") and t < 58:
+    if s in ("a", "b", "c", "final") and t < FIN + 2:
         n = int(eighth * SR)
         nota = BAJOS[acorde_en(t)] + (12 if i % 2 else 0)
         sig = lp(saw(midi(nota), n, 0.004), 600 if s != "a" else 380) * env_adsr(n, 0.004, 0.05)
@@ -205,7 +222,7 @@ sixteenth = BEAT / 4
 for i in range(int(DUR / sixteenth)):
     t = i * sixteenth
     s = seccion(t)
-    if s == "final" and t >= 58:
+    if s == "final" and t >= FIN + 2:
         continue
     notas = ACORDES[acorde_en(t)]
     nota = notas[[0, 1, 2, 1, 2, 0, 2, 1][i % 8] % len(notas)] + 12
@@ -215,17 +232,14 @@ for i in range(int(DUR / sixteenth)):
     sig = (np.sin(2 * np.pi * f * tt) + 0.35 * np.sin(4 * np.pi * f * tt) + 0.12 * np.sin(6 * np.pi * f * tt)) * np.exp(-tt * 18)
     g = 0.1 if s in ("intro", "quiebre") else 0.16
     if s == "intro":
-        g *= 0.4 + 0.6 * t / 4
+        g *= 0.4 + 0.6 * t / CFG["secciones"][0][1]
     put(arp, sig, t, g * (1.0 if i % 4 == 0 else 0.75))
 
 # efectos
 for g in GOLPES:
-    put(fx, impacto(), g, 0.9 if g in (4, 32, 56) else 0.55)
-put(fx, subida(4.0), 0.0, 0.8)
-put(fx, subida(2.0), 30.0, 0.9)
-put(fx, subida(4.0), 52.0, 0.7)
-put(fx, subida(1.0), 15.0, 0.5)
-put(fx, subida(1.0), 43.0, 0.5)
+    put(fx, impacto(), g, 0.9 if g in CFG["fuertes"] else 0.55)
+for ini, dur, vol in CFG["subidas"]:
+    put(fx, subida(float(dur)), float(ini), vol)
 
 # acorde final que queda sonando
 n = int(4 * SR)
@@ -233,7 +247,7 @@ tt = np.arange(n) / SR
 fin = np.zeros(n)
 for nota in [48, 60, 64, 67, 72]:
     fin += saw(midi(nota), n, 0.006)
-put(pad, lp(fin, 2200) * np.exp(-tt * 0.9), 56.0, 0.18)
+put(pad, lp(fin, 2200) * np.exp(-tt * 0.9), FIN, 0.18)
 
 mix = drums * 0.9 + bass * side + pad * side + arp * (0.6 + 0.4 * side) + fx
 mix = hp(mix, 30)
