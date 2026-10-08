@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="es" data-resolution="landscape">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "Fira Sans"; font-weight: 400; src: url(assets/fonts/fira-sans-latin-400-normal.woff2) format("woff2"), url(assets/fonts/fira-sans-latin-ext-400-normal.woff2) format("woff2"); }
+      @font-face { font-family: "Fira Sans"; font-weight: 400; font-style: italic; src: url(assets/fonts/fira-sans-latin-400-italic.woff2) format("woff2"), url(assets/fonts/fira-sans-latin-ext-400-italic.woff2) format("woff2"); }
+      @font-face { font-family: "Fira Sans"; font-weight: 500; src: url(assets/fonts/fira-sans-latin-500-normal.woff2) format("woff2"), url(assets/fonts/fira-sans-latin-ext-500-normal.woff2) format("woff2"); }
+      @font-face { font-family: "Fira Sans"; font-weight: 700; src: url(assets/fonts/fira-sans-latin-700-normal.woff2) format("woff2"), url(assets/fonts/fira-sans-latin-ext-700-normal.woff2) format("woff2"); }
+      @font-face { font-family: "Fira Sans"; font-weight: 800; src: url(assets/fonts/fira-sans-latin-800-normal.woff2) format("woff2"), url(assets/fonts/fira-sans-latin-ext-800-normal.woff2) format("woff2"); }
+
+      :root {
+        --noche: #0f3346;
+        --tablero: #19546e;
+        --petroleo: #30556d;
+        --dorado: #d4962c;
+        --amarillo: #fdbf41;
+        --texto: #1f2a33;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--noche); }
+      #root { position: relative; width: 100%; height: 100%; font-family: "Fira Sans", sans-serif; }
+      .clip { position: absolute; inset: 0; overflow: hidden; }
+      .abs { position: absolute; }
+      .oscuro { background: var(--noche); color: #fff; }
+      .blanco { background: #fff; color: var(--texto); }
+      .dorado-bg { background: var(--dorado); color: #fff; }
+      .g { color: var(--dorado); }
+      .a { color: var(--amarillo); }
+      .ch { display: none; }
+      .caret { display: inline-block; width: 0.08em; height: 0.95em; margin-left: 0.06em; vertical-align: -0.1em; background: var(--dorado); }
+      .etiqueta { font-size: 30px; font-weight: 700; letter-spacing: 0.32em; text-transform: uppercase; color: var(--dorado); }
+      .dots { position: absolute; width: 120px; height: 72px; background-image: radial-gradient(circle, var(--c, var(--dorado)) 5px, transparent 5.5px); background-size: 24px 24px; }
+      .flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 50; }
+      .marca { position: absolute; right: 56px; bottom: 44px; width: 150px; }
+
+      /* 0. Gancho */
+      #s-gancho .q { left: 160px; top: 380px; width: 1600px; font-size: 104px; font-weight: 700; line-height: 1.1; }
+      #s-gancho .linea { left: 160px; top: 330px; width: 140px; height: 8px; background: var(--dorado); }
+
+      /* 1. Título */
+      #s-titulo .bloque { left: 0; top: 330px; width: 1920px; height: 420px; background: var(--tablero); }
+      #s-titulo .icono { left: 210px; top: 400px; height: 270px; }
+      #s-titulo h1 { left: 620px; top: 395px; font-size: 136px; font-weight: 800; line-height: 1; color: #fff; text-transform: uppercase; letter-spacing: -0.01em; }
+      #s-titulo h1 sup { font-size: 0.4em; vertical-align: 1.2em; }
+      #s-titulo .por { left: 626px; top: 680px; font-size: 40px; color: var(--amarillo); font-weight: 500; }
+      #s-titulo .logo { left: 840px; top: 90px; width: 240px; }
+
+      /* 2. Qué es */
+      #s-que .etiqueta { left: 140px; top: 150px; }
+      #s-que .def { left: 140px; top: 220px; width: 820px; font-size: 62px; font-weight: 700; line-height: 1.15; color: var(--tablero); }
+      #s-que .verbos { left: 140px; top: 640px; display: flex; gap: 22px; }
+      #s-que .verbo { font-size: 66px; font-weight: 800; color: #fff; background: var(--dorado); padding: 6px 26px 12px; border-radius: 10px; }
+      #s-que .cierre { left: 140px; top: 820px; width: 840px; font-size: 40px; line-height: 1.3; color: var(--texto); }
+      /* tablero ilustrativo */
+      #dash { left: 1040px; top: 130px; width: 760px; height: 820px; background: #f4f7f9; border-radius: 26px; box-shadow: 0 30px 80px rgba(15, 51, 70, .22); overflow: hidden; }
+      #dash .barra-sup { height: 84px; background: var(--tablero); display: flex; align-items: center; gap: 18px; padding: 0 32px; color: #fff; font-size: 30px; font-weight: 700; }
+      #dash .barra-sup img { height: 46px; }
+      #dash .kpis { display: flex; gap: 20px; padding: 28px 32px 0; }
+      #dash .kpi { flex: 1; background: #fff; border-radius: 16px; padding: 20px 22px; box-shadow: 0 4px 14px rgba(0,0,0,.06); }
+      #dash .kpi span { display: block; font-size: 22px; color: #6b7a86; font-weight: 500; }
+      #dash .kpi b { display: block; margin-top: 8px; font-size: 52px; color: var(--tablero); font-weight: 800; }
+      #dash .kpi b.ok { color: #2f8a5b; }
+      #dash .graf { margin: 26px 32px 0; height: 300px; background: #fff; border-radius: 16px; padding: 26px; position: relative; box-shadow: 0 4px 14px rgba(0,0,0,.06); }
+      #dash .barras { position: absolute; left: 30px; right: 30px; bottom: 26px; height: 230px; display: flex; align-items: flex-end; gap: 22px; }
+      #dash .bar { flex: 1; background: var(--tablero); border-radius: 8px 8px 0 0; transform-origin: bottom; }
+      #dash .bar.d { background: var(--dorado); }
+      #dash svg.linea { position: absolute; left: 30px; top: 30px; width: 640px; height: 220px; overflow: visible; }
+      #dash .fila { display: flex; gap: 20px; margin: 22px 32px 0; }
+      #dash .medidor { flex: 1; height: 150px; background: #fff; border-radius: 16px; padding: 22px; box-shadow: 0 4px 14px rgba(0,0,0,.06); }
+      #dash .medidor span { font-size: 22px; color: #6b7a86; font-weight: 500; }
+      #dash .pista { margin-top: 26px; height: 22px; background: #e3e9ee; border-radius: 11px; overflow: hidden; }
+      #dash .relleno { height: 100%; background: var(--dorado); border-radius: 11px; transform-origin: left; }
+      #dash .ilustr { position: absolute; right: 22px; bottom: 14px; font-size: 18px; color: #9aa7b1; }
+
+      /* 3. Preguntas */
+      #s-preg-intro .etiqueta { left: 0; width: 1920px; top: 380px; text-align: center; }
+      #s-preg-intro h2 { left: 160px; width: 1600px; top: 450px; text-align: center; font-size: 100px; font-weight: 800; line-height: 1.08; }
+      .pregunta .num { left: 160px; top: 250px; font-size: 34px; font-weight: 700; letter-spacing: 0.25em; opacity: .75; }
+      .pregunta .q { left: 160px; top: 320px; width: 1600px; font-size: 124px; font-weight: 800; line-height: 1.05; }
+      .pregunta .r { left: 160px; top: 760px; font-size: 42px; font-weight: 500; display: flex; align-items: center; gap: 22px; }
+      .pregunta .r i { display: inline-block; width: 60px; height: 6px; background: currentColor; }
+      .pregunta.dorado-bg .q { color: #fff; }
+      .pregunta.dorado-bg .r { color: var(--noche); }
+      .pregunta.oscuro .r { color: var(--amarillo); }
+      .pregunta.blanco .q { color: var(--tablero); }
+      .pregunta.blanco .r { color: var(--dorado); }
+
+      /* 4. Cómo trabajamos */
+      #s-como-intro h2 { left: 160px; top: 400px; width: 1600px; font-size: 150px; font-weight: 800; color: var(--tablero); line-height: 1; }
+      #s-como-intro p { left: 166px; top: 590px; font-size: 48px; color: var(--dorado); font-weight: 500; }
+      #s-pasos .lado { left: 0; top: 0; width: 640px; height: 1080px; background: var(--tablero); }
+      #s-pasos .titulo-lado { left: 90px; top: 110px; color: #fff; font-size: 46px; font-weight: 800; line-height: 1.1; text-transform: uppercase; }
+      #s-pasos .nums { left: 90px; top: 300px; display: flex; flex-direction: column; gap: 14px; }
+      #s-pasos .nums div { display: flex; align-items: center; gap: 22px; color: rgba(255,255,255,.35); font-size: 32px; font-weight: 700; }
+      #s-pasos .nums div em { font-style: normal; width: 62px; height: 62px; border-radius: 50%; border: 3px solid rgba(255,255,255,.35); display: flex; align-items: center; justify-content: center; font-size: 30px; }
+      .paso { left: 640px; top: 0; width: 1280px; height: 1080px; }
+      .paso .n { position: absolute; left: 110px; top: 170px; font-size: 300px; font-weight: 800; color: var(--dorado); line-height: 1; }
+      .paso h3 { position: absolute; left: 110px; top: 500px; width: 1080px; font-size: 92px; font-weight: 800; color: var(--tablero); line-height: 1.05; }
+      .paso p { position: absolute; left: 110px; top: 720px; width: 1000px; font-size: 46px; line-height: 1.35; color: var(--texto); }
+
+      /* 5. Beneficios */
+      #s-benef .etiqueta { left: 140px; top: 110px; color: var(--noche); }
+      #s-benef .lista { left: 140px; top: 190px; width: 1640px; display: flex; flex-direction: column; gap: 22px; }
+      #s-benef .ben { display: flex; align-items: baseline; gap: 36px; }
+      #s-benef .ben b { font-size: 112px; font-weight: 800; color: #fff; line-height: 1.05; white-space: nowrap; }
+      #s-benef .ben span { font-size: 36px; color: var(--noche); font-weight: 500; }
+
+      /* 6. Pregunta final */
+      #s-final-q .q { left: 160px; top: 330px; width: 1600px; font-size: 112px; font-weight: 800; line-height: 1.08; }
+
+      /* 7. Cierre */
+      #s-cierre .logo { left: 760px; top: 110px; width: 400px; }
+      #s-cierre .prod { left: 0; width: 1920px; top: 470px; text-align: center; font-size: 76px; font-weight: 800; color: var(--tablero); text-transform: uppercase; }
+      #s-cierre .prod sup { font-size: 0.45em; vertical-align: 1em; }
+      #s-cierre .bajada { left: 0; width: 1920px; top: 575px; text-align: center; font-size: 40px; color: var(--dorado); font-weight: 500; }
+      #s-cierre .contacto { left: 260px; width: 1400px; top: 760px; display: flex; justify-content: space-between; font-size: 36px; color: var(--texto); }
+      #s-cierre .contacto div { text-align: center; }
+      #s-cierre .contacto small { display: block; font-size: 24px; color: #6b7a86; letter-spacing: .2em; text-transform: uppercase; margin-bottom: 8px; }
+      #s-cierre .contacto b { font-weight: 700; color: var(--tablero); }
+      #s-cierre .franja { left: 0; top: 1040px; width: 1920px; height: 40px; background: var(--dorado); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="60" data-width="1920" data-height="1080">
+      <audio id="musica" src="assets/audio/musica.mp3" data-start="0" data-duration="60" data-track-index="9"></audio>
+
+      <!-- 0. Gancho · 0–4 s -->
+      <section id="s-gancho" class="clip oscuro" data-start="0" data-duration="4" data-track-index="0">
+        <div class="dots" style="left: 24px; top: 24px"></div>
+        <div class="linea abs"></div>
+        <div class="q abs"><span class="type" data-t="0.4" data-d="2.4">¿Sabés dónde está <span class="g">parada</span> tu empresa hoy?</span><span class="caret"></span></div>
+      </section>
+
+      <!-- 1. Título · 4–8 s -->
+      <section id="s-titulo" class="clip blanco" data-start="4" data-duration="4" data-track-index="0">
+        <img class="logo abs" src="assets/brand/logo.png" alt="ABRE Integradores" />
+        <div class="bloque abs"></div>
+        <img class="icono abs" src="assets/brand/icon-tablero-blanco.png" alt="" />
+        <h1 class="abs">Tablero de<br />Dirección<sup>®</sup></h1>
+        <div class="por abs">Información clara para decidir mejor.</div>
+        <div class="flash"></div>
+      </section>
+
+      <!-- 2. Qué es · 8–16 s -->
+      <section id="s-que" class="clip blanco" data-start="8" data-duration="8" data-track-index="0">
+        <div class="etiqueta abs">¿Qué es?</div>
+        <div class="def abs"><span class="type" data-t="8.3" data-d="3.0">Una herramienta estratégica que te muestra, en un solo lugar, <span class="g">cómo está tu negocio.</span></span></div>
+        <div class="verbos abs"><div class="verbo">Medí.</div><div class="verbo">Planificá.</div><div class="verbo">Decidí.</div></div>
+        <div class="cierre abs"><span class="type" data-t="14.0" data-d="1.4">Con la confianza de un análisis profesional e independiente.</span></div>
+        <div id="dash" class="abs">
+          <div class="barra-sup"><img src="assets/brand/icon-tablero-blanco.png" alt="" />Tablero de Dirección</div>
+          <div class="kpis">
+            <div class="kpi"><span>Ventas</span><b data-to="18" data-fmt="+%">+0%</b></div>
+            <div class="kpi"><span>Rentabilidad</span><b data-to="24" data-fmt="%">0%</b></div>
+            <div class="kpi"><span>Liquidez</span><b class="ok" data-to="1.6" data-fmt="x">0.0x</b></div>
+          </div>
+          <div class="graf">
+            <div class="barras">
+              <div class="bar" style="height: 42%"></div><div class="bar" style="height: 55%"></div><div class="bar" style="height: 48%"></div>
+              <div class="bar" style="height: 66%"></div><div class="bar" style="height: 72%"></div><div class="bar d" style="height: 88%"></div>
+            </div>
+            <svg class="linea" viewBox="0 0 640 220"><path id="linea-path" d="M10 170 L120 140 L230 150 L340 100 L450 80 L560 30" fill="none" stroke="#d4962c" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </div>
+          <div class="fila">
+            <div class="medidor"><span>Cumplimiento de objetivos</span><div class="pista"><div class="relleno" style="width: 82%"></div></div></div>
+            <div class="medidor"><span>Flujo de efectivo</span><div class="pista"><div class="relleno" style="width: 68%; background: var(--tablero)"></div></div></div>
+          </div>
+          <div class="ilustr">Imagen ilustrativa</div>
+        </div>
+        <div class="flash"></div>
+      </section>
+
+      <!-- 3a. Preguntas (intro) · 16–18 s -->
+      <section id="s-preg-intro" class="clip oscuro" data-start="16" data-duration="2" data-track-index="0">
+        <div class="etiqueta abs">Preguntas que te ayuda a responder</div>
+        <h2 class="abs"><span class="type" data-t="16.2" data-d="1.2">¿Qué querés saber de tu <span class="a">negocio</span>?</span></h2>
+        <div class="flash"></div>
+      </section>
+
+      <!-- 3b. Preguntas · 18–30 s (una cada 2 s) -->
+      <section id="s-p1" class="clip pregunta dorado-bg" data-start="18" data-duration="2" data-track-index="0">
+        <div class="num abs">PREGUNTA 01</div>
+        <div class="q abs"><span class="type" data-t="18.05" data-d="0.9">¿Dónde estoy parado?</span></div>
+        <div class="r abs"><i></i>Tu situación patrimonial y financiera, con mirada objetiva.</div>
+      </section>
+      <section id="s-p2" class="clip pregunta oscuro" data-start="20" data-duration="2" data-track-index="0">
+        <div class="num abs">PREGUNTA 02</div>
+        <div class="q abs"><span class="type" data-t="20.05" data-d="1.0">¿Dónde está el dinero que gano?</span></div>
+        <div class="r abs"><i></i>Rentabilidad, liquidez y flujo de efectivo bajo control.</div>
+      </section>
+      <section id="s-p3" class="clip pregunta blanco" data-start="22" data-duration="2" data-track-index="0">
+        <div class="num abs" style="color: var(--tablero)">PREGUNTA 03</div>
+        <div class="q abs"><span class="type" data-t="22.05" data-d="1.0">¿Estoy cumpliendo mis objetivos?</span></div>
+        <div class="r abs"><i></i>Indicadores clave definidos con la Dirección.</div>
+      </section>
+      <section id="s-p4" class="clip pregunta dorado-bg" data-start="24" data-duration="2" data-track-index="0">
+        <div class="num abs">PREGUNTA 04</div>
+        <div class="q abs"><span class="type" data-t="24.05" data-d="1.0">¿Puedo confiar en mis números?</span></div>
+        <div class="r abs"><i></i>Datos validados con revisiones continuas.</div>
+      </section>
+      <section id="s-p5" class="clip pregunta oscuro" data-start="26" data-duration="2" data-track-index="0">
+        <div class="num abs">PREGUNTA 05</div>
+        <div class="q abs"><span class="type" data-t="26.05" data-d="1.0">¿Hacia dónde va mi negocio?</span></div>
+        <div class="r abs"><i></i>Proyección y planificación financiera.</div>
+      </section>
+      <section id="s-p6" class="clip pregunta blanco" data-start="28" data-duration="2" data-track-index="0">
+        <div class="num abs" style="color: var(--tablero)">PREGUNTA 06</div>
+        <div class="q abs"><span class="type" data-t="28.05" data-d="1.0">¿Qué decisión tomo hoy?</span></div>
+        <div class="r abs"><i></i>Una visión clara y oportuna para decidir.</div>
+      </section>
+
+      <!-- 4a. Cómo trabajamos (quiebre) · 30–32 s -->
+      <section id="s-como-intro" class="clip blanco" data-start="30" data-duration="2" data-track-index="0">
+        <div class="dots" style="left: 24px; top: 24px"></div>
+        <h2 class="abs"><span class="type" data-t="30.1" data-d="1.2">¿Cómo trabajamos?</span><span class="caret"></span></h2>
+        <p class="abs">En 6 pasos simples.</p>
+      </section>
+
+      <!-- 4b. Pasos · 32–44 s (uno cada 2 s) -->
+      <section id="s-pasos" class="clip blanco" data-start="32" data-duration="12" data-track-index="0">
+        <div class="lado abs"></div>
+        <div class="titulo-lado abs">Cómo<br />trabajamos</div>
+        <div class="nums abs">
+          <div><em>1</em>Escuchar</div><div><em>2</em>Ordenar</div><div><em>3</em>Diseñar</div>
+          <div><em>4</em>Implementar</div><div><em>5</em>Interpretar</div><div><em>6</em>Mejorar</div>
+        </div>
+        <div class="paso abs" id="paso-1"><div class="n">01</div><h3><span class="type" data-t="32.1" data-d="0.6">Te escuchamos</span></h3><p>Entrevistas con la Dirección para definir objetivos e indicadores clave.</p></div>
+        <div class="paso abs" id="paso-2"><div class="n">02</div><h3><span class="type" data-t="34.1" data-d="0.6">Ordenamos tus datos</span></h3><p>Validamos e integramos la información contable y extracontable.</p></div>
+        <div class="paso abs" id="paso-3"><div class="n">03</div><h3><span class="type" data-t="36.1" data-d="0.6">Diseñamos tu tablero</span></h3><p>Resultados e indicadores económicos y financieros en Power BI.</p></div>
+        <div class="paso abs" id="paso-4"><div class="n">04</div><h3><span class="type" data-t="38.1" data-d="0.6">Lo ponemos en marcha</span></h3><p>Cargamos datos reales y validamos cada número.</p></div>
+        <div class="paso abs" id="paso-5"><div class="n">05</div><h3><span class="type" data-t="40.1" data-d="0.6">Lo interpretamos con vos</span></h3><p>Cada mes analizamos los resultados en una reunión con la Dirección.</p></div>
+        <div class="paso abs" id="paso-6"><div class="n">06</div><h3><span class="type" data-t="42.1" data-d="0.6">Mejoramos siempre</span></h3><p>Monitoreo, actualización de indicadores y proyección.</p></div>
+        <img class="marca" src="assets/brand/logo.png" alt="" />
+        <div class="flash"></div>
+      </section>
+
+      <!-- 5. Beneficios · 44–52 s -->
+      <section id="s-benef" class="clip dorado-bg" data-start="44" data-duration="8" data-track-index="0">
+        <div class="dots" style="left: 24px; top: 24px; --c: #ffffff"></div>
+        <div class="etiqueta abs">Lo que ganás</div>
+        <div class="lista abs">
+          <div class="ben"><b>Visión clara.</b><span>Sabés dónde estás parado.</span></div>
+          <div class="ben"><b>Confiabilidad.</b><span>Información de calidad, revisada.</span></div>
+          <div class="ben"><b>Finanzas en orden.</b><span>Rentabilidad, liquidez y flujo.</span></div>
+          <div class="ben"><b>Decisiones inteligentes.</b><span>Con datos, no a ciegas.</span></div>
+        </div>
+        <img class="marca" src="assets/brand/logo-blanco.png" alt="" />
+        <div class="flash"></div>
+      </section>
+
+      <!-- 6. Pregunta final · 52–56 s -->
+      <section id="s-final-q" class="clip oscuro" data-start="52" data-duration="4" data-track-index="0">
+        <div class="q abs"><span class="type" data-t="52.3" data-d="2.6">¿Listo para tomar decisiones con información <span class="g">clara y confiable</span>?</span><span class="caret"></span></div>
+      </section>
+
+      <!-- 7. Cierre · 56–60 s -->
+      <section id="s-cierre" class="clip blanco" data-start="56" data-duration="4" data-track-index="0">
+        <img class="logo abs" src="assets/brand/logo.png" alt="ABRE Integradores" />
+        <div class="prod abs">Tablero de Dirección<sup>®</sup></div>
+        <div class="bajada abs">Animáte a pensar en grande. Nosotros te acompañamos.</div>
+        <div class="contacto abs">
+          <div><small>Web</small><b>abreintegradores.com.ar</b></div>
+          <div><small>Email</small><b>info@abreintegradores.com.ar</b></div>
+          <div><small>WhatsApp</small><b>+54 9 11 5008-2859</b></div>
+        </div>
+        <div class="franja abs"></div>
+        <div class="flash"></div>
+      </section>
+    </div>
+
+    <script>
+      // Divide cada texto ".type" en letras para el efecto de escritura (determinístico).
+      document.querySelectorAll(".type").forEach((el) => {
+        const walk = (node) => {
+          [...node.childNodes].forEach((child) => {
+            if (child.nodeType === 3) {
+              const frag = document.createDocumentFragment();
+              for (const c of child.textContent) {
+                const s = document.createElement("span");
+                s.className = "ch";
+                s.textContent = c;
+                frag.appendChild(s);
+              }
+              child.replaceWith(frag);
+            } else {
+              walk(child);
+            }
+          });
+        };
+        walk(el);
+      });
+
+      const tl = gsap.timeline({ paused: true });
+      const ease = "power3.out";
+      const pop = "back.out(1.8)";
+
+      // Escritura: cada letra aparece en su momento.
+      document.querySelectorAll(".type").forEach((el) => {
+        const chars = el.querySelectorAll(".ch");
+        const t = parseFloat(el.dataset.t);
+        const step = parseFloat(el.dataset.d) / chars.length;
+        chars.forEach((ch, i) => {
+          tl.fromTo(ch, { display: "none" }, { display: "inline", duration: 0.001, immediateRender: false }, t + i * step);
+        });
+      });
+
+      // Cursores que parpadean
+      const caret = (sel, start, dur) => {
+        tl.fromTo(sel, { opacity: 1 }, { opacity: 0, duration: 0.25, ease: "steps(1)", repeat: Math.max(0, Math.floor(dur / 0.25) - 1), yoyo: true }, start);
+      };
+      caret("#s-gancho .caret", 0, 4);
+      caret("#s-como-intro .caret", 30, 2);
+      caret("#s-final-q .caret", 52, 4);
+
+      // Destello blanco en cada golpe de la música
+      const golpe = (sel, t) => tl.fromTo(sel, { opacity: 0.85 }, { opacity: 0, duration: 0.35, ease: "power2.out" }, t);
+
+      // 0. Gancho
+      tl.fromTo("#s-gancho .linea", { scaleX: 0, transformOrigin: "left" }, { scaleX: 1, duration: 0.5, ease }, 0.1);
+      tl.fromTo("#s-gancho .dots", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 0.2);
+
+      // 1. Título (golpe a los 4 s)
+      golpe("#s-titulo .flash", 4);
+      tl.fromTo("#s-titulo .bloque", { scaleY: 0 }, { scaleY: 1, duration: 0.4, ease: "power4.out" }, 4);
+      tl.fromTo("#s-titulo h1", { scale: 1.35, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.45, ease: "power4.out", transformOrigin: "left center" }, 4);
+      tl.fromTo("#s-titulo .icono", { scale: 0, rotation: -20 }, { scale: 1, rotation: 0, duration: 0.5, ease: pop }, 4.5);
+      tl.fromTo("#s-titulo .logo", { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 0.5, ease }, 5);
+      tl.fromTo("#s-titulo .por", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease }, 6);
+
+      // 2. Qué es (golpe a los 8 s)
+      golpe("#s-que .flash", 8);
+      tl.fromTo("#s-que .etiqueta", { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.4, ease }, 8);
+      tl.fromTo("#dash", { opacity: 0, y: 80, rotation: 3 }, { opacity: 1, y: 0, rotation: 0, duration: 0.7, ease }, 8.5);
+      tl.fromTo("#dash .kpi", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.4, ease, stagger: 0.5 }, 9);
+      document.querySelectorAll("#dash .kpi b").forEach((b, i) => {
+        const to = parseFloat(b.dataset.to);
+        const fmt = b.dataset.fmt;
+        const o = { v: 0 };
+        const show = () => {
+          const v = fmt === "x" ? o.v.toFixed(1) : Math.round(o.v);
+          b.textContent = fmt === "+%" ? `+${v}%` : fmt === "%" ? `${v}%` : `${v}x`;
+        };
+        tl.fromTo(o, { v: 0 }, { v: to, duration: 1.2, ease: "power2.out", onUpdate: show, immediateRender: false }, 9 + i * 0.5);
+      });
+      tl.fromTo("#dash .bar", { scaleY: 0 }, { scaleY: 1, duration: 0.35, ease: pop, stagger: 0.5 }, 10.5);
+      tl.fromTo("#linea-path", { strokeDasharray: 800, strokeDashoffset: 800 }, { strokeDashoffset: 0, duration: 2.5, ease: "none" }, 11);
+      tl.fromTo("#dash .relleno", { scaleX: 0 }, { scaleX: 1, duration: 1, ease, stagger: 0.5 }, 12.5);
+      tl.fromTo("#s-que .verbo", { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.35, ease: pop, stagger: 1 }, 11.5);
+
+      // 3. Preguntas (golpe a los 16 s, corte cada 2 s)
+      golpe("#s-preg-intro .flash", 16);
+      tl.fromTo("#s-preg-intro .etiqueta", { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.4, ease }, 16);
+      [18, 20, 22, 24, 26, 28].forEach((t, i) => {
+        const s = `#s-p${i + 1}`;
+        tl.fromTo(`${s} .num`, { opacity: 0, x: -40 }, { opacity: 0.75, x: 0, duration: 0.3, ease }, t);
+        tl.fromTo(`${s} .q`, { scale: 1.08 }, { scale: 1, duration: 0.5, ease: "power4.out", transformOrigin: "left center" }, t);
+        tl.fromTo(`${s} .r`, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.35, ease }, t + 1.1);
+        tl.fromTo(`${s} .r i`, { scaleX: 0, transformOrigin: "left" }, { scaleX: 1, duration: 0.3, ease }, t + 1.1);
+      });
+
+      // 4. Cómo trabajamos
+      tl.fromTo("#s-como-intro p", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease }, 31.2);
+      golpe("#s-pasos .flash", 32);
+      tl.fromTo("#s-pasos .lado", { xPercent: -100 }, { xPercent: 0, duration: 0.4, ease: "power4.out" }, 32);
+      tl.fromTo("#s-pasos .titulo-lado", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 32.2);
+      tl.fromTo("#s-pasos .nums div", { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.25, ease, stagger: 0.06 }, 32.2);
+      for (let i = 1; i <= 6; i++) {
+        const t = 32 + (i - 1) * 2;
+        const p = `#paso-${i}`;
+        tl.fromTo(p, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.01 }, t);
+        if (i < 6) tl.to(p, { autoAlpha: 0, duration: 0.01 }, t + 2);
+        tl.fromTo(`${p} .n`, { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: pop, transformOrigin: "left bottom" }, t);
+        tl.fromTo(`${p} p`, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.4, ease }, t + 0.8);
+        const row = `#s-pasos .nums div:nth-child(${i})`;
+        tl.to(row, { color: "#ffffff", duration: 0.2 }, t);
+        tl.to(`${row} em`, { backgroundColor: "#d4962c", borderColor: "#d4962c", color: "#ffffff", duration: 0.2 }, t);
+      }
+
+      // 5. Beneficios (golpe a los 44 s, uno cada 2 s)
+      golpe("#s-benef .flash", 44);
+      tl.fromTo("#s-benef .etiqueta", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 44);
+      document.querySelectorAll("#s-benef .ben").forEach((ben, i) => {
+        const t = 44 + i * 2;
+        tl.fromTo(ben.querySelector("b"), { opacity: 0, scale: 1.4, x: 60 }, { opacity: 1, scale: 1, x: 0, duration: 0.4, ease: "power4.out", transformOrigin: "left center" }, t);
+        tl.fromTo(ben.querySelector("span"), { opacity: 0 }, { opacity: 1, duration: 0.4 }, t + 0.5);
+      });
+
+      // 7. Cierre (golpe a los 56 s)
+      golpe("#s-cierre .flash", 56);
+      tl.fromTo("#s-cierre .logo", { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: pop }, 56);
+      tl.fromTo("#s-cierre .prod", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.4, ease }, 56.4);
+      tl.fromTo("#s-cierre .bajada", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 56.9);
+      tl.fromTo("#s-cierre .contacto div", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.35, ease, stagger: 0.25 }, 57.3);
+      tl.fromTo("#s-cierre .franja", { scaleX: 0, transformOrigin: "left" }, { scaleX: 1, duration: 0.8, ease }, 56.2);
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
