@@ -1,6 +1,6 @@
 """Genera la música de los videos (120 BPM) de forma determinística.
 
-Hay dos estructuras: "horizontal" (60 s, la por defecto) y "reel" (100 s, vertical).
+Estructuras: "horizontal" (60 s, la por defecto), "reel" (100 s) y "reel-foto" (52 s).
 
 Estructura horizontal (1 compás = 2 s):
   0–4 s   intro: pad + arpegio filtrado + subida      → golpe a los 4 s
@@ -45,6 +45,13 @@ ESTRUCTURAS = {
         "golpes": [6, 10, 20, 24, 52, 76, 88, 94],
         "fuertes": [6, 52, 94],
         "subidas": [(0, 6, 0.8), (48, 4, 0.9), (88, 6, 0.7), (19, 1, 0.5), (75, 1, 0.5)],
+    },
+    "reel-foto": {
+        "dur": 52.0,
+        "secciones": [(0, 4, "intro"), (4, 10, "a"), (10, 30, "b"), (30, 32, "quiebre"), (32, 40, "b"), (40, 46, "c"), (46, 52, "final")],
+        "golpes": [4, 10, 20, 32, 40, 46],
+        "fuertes": [10, 32, 46],
+        "subidas": [(0, 4, 0.8), (8, 2, 0.5), (30, 2, 0.9), (45, 1, 0.5)],
     },
 }
 CFG = ESTRUCTURAS[sys.argv[2] if len(sys.argv) > 2 else "horizontal"]
