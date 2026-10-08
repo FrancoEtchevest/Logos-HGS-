@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="es" data-resolution="landscape">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "Fira Sans"; font-weight: 400; font-style: normal; src: url(assets/fonts/fira-sans-latin-400-normal.woff2) format("woff2"), url(assets/fonts/fira-sans-latin-ext-400-normal.woff2) format("woff2"); }
+      @font-face { font-family: "Fira Sans"; font-weight: 400; font-style: italic; src: url(assets/fonts/fira-sans-latin-400-italic.woff2) format("woff2"), url(assets/fonts/fira-sans-latin-ext-400-italic.woff2) format("woff2"); }
+      @font-face { font-family: "Fira Sans"; font-weight: 500; font-style: normal; src: url(assets/fonts/fira-sans-latin-500-normal.woff2) format("woff2"), url(assets/fonts/fira-sans-latin-ext-500-normal.woff2) format("woff2"); }
+      @font-face { font-family: "Fira Sans"; font-weight: 700; font-style: normal; src: url(assets/fonts/fira-sans-latin-700-normal.woff2) format("woff2"), url(assets/fonts/fira-sans-latin-ext-700-normal.woff2) format("woff2"); }
+      @font-face { font-family: "Fira Sans"; font-weight: 800; font-style: normal; src: url(assets/fonts/fira-sans-latin-800-normal.woff2) format("woff2"), url(assets/fonts/fira-sans-latin-ext-800-normal.woff2) format("woff2"); }
+
+      :root {
+        --dorado: #d4962c;
+        --petroleo: #30556d;
+        --amarillo: #fdbf41;
+        --texto: #1f1f1f;
+        --auditoria: #46416e;
+        --tablero: #19546e;
+        --contable: #612f63;
+        --procesos: #295457;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: #ffffff; }
+      #root { position: relative; width: 100%; height: 100%; font-family: "Fira Sans", sans-serif; color: var(--texto); }
+      .clip { position: absolute; inset: 0; overflow: hidden; background: #ffffff; }
+      .abs { position: absolute; }
+      .cover-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .dots {
+        position: absolute; width: 96px; height: 72px;
+        background-image: radial-gradient(circle, var(--c, var(--dorado)) 5px, transparent 5.5px);
+        background-size: 24px 24px;
+      }
+      h2.titulo { font-weight: 800; text-transform: uppercase; letter-spacing: -0.01em; line-height: 0.95; }
+
+      /* 1. Portada */
+      #s-portada .foto { left: 1190px; top: 0; width: 730px; height: 1080px; overflow: hidden; }
+      #s-portada .foto img { object-position: 80% 50%; }
+      #s-portada .logo { left: 720px; top: 40px; width: 380px; }
+      #s-portada .banda { left: 0; top: 380px; width: 1190px; height: 360px; background: var(--dorado); }
+      #s-portada .banda h1 { position: absolute; left: 110px; top: 70px; color: #fff; font-size: 108px; font-weight: 700; line-height: 1.02; letter-spacing: -0.01em; }
+      #s-portada .sub { left: 110px; top: 820px; width: 1000px; color: var(--petroleo); font-size: 52px; font-weight: 700; line-height: 1.15; }
+
+      /* 2. Quiénes somos */
+      #s-quienes .foto { left: 0; top: 0; width: 1920px; height: 600px; overflow: hidden; }
+      #s-quienes .foto img { object-position: 50% 80%; }
+      #s-quienes .foto::after { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,0) 45%); }
+      #s-quienes .titulo { left: 80px; top: 470px; color: #fff; font-size: 96px; display: flex; align-items: center; gap: 18px; z-index: 2; }
+      #s-quienes .titulo img { height: 90px; }
+      #s-quienes .izq { left: 0; top: 600px; width: 960px; height: 480px; display: flex; align-items: center; justify-content: center; padding: 0 110px; text-align: center; color: var(--dorado); font-size: 40px; line-height: 1.35; }
+      #s-quienes .der { left: 960px; top: 600px; width: 960px; height: 480px; background: var(--dorado); display: flex; align-items: center; justify-content: center; padding: 0 110px; text-align: center; color: #fff; font-size: 40px; line-height: 1.35; }
+
+      /* 3. Servicios (resumen) */
+      #s-servicios h2 { left: 0; width: 1920px; top: 130px; text-align: center; color: var(--petroleo); font-size: 150px; }
+      #s-servicios .bajada { left: 160px; width: 1600px; top: 320px; text-align: center; font-size: 36px; line-height: 1.4; }
+      #s-servicios .base { left: 0; top: 700px; width: 1920px; height: 380px; background: var(--dorado); border-radius: 48px 48px 0 0; }
+      #s-servicios .cards { left: 160px; top: 520px; width: 1600px; display: flex; gap: 32px; }
+      #s-servicios .card { flex: 1; height: 420px; border-radius: 28px; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 40px; text-align: center; font-size: 38px; font-weight: 700; text-transform: uppercase; line-height: 1.05; }
+      #s-servicios .card img { height: 150px; }
+
+      /* 4–7. Cada servicio */
+      .servicio .panel { left: 380px; top: 525px; width: 1540px; height: 555px; background: var(--c); }
+      .servicio .foto { left: 110px; top: 200px; width: 830px; height: 780px; overflow: hidden; z-index: 2; }
+      .servicio .encabezado { left: 1000px; top: 170px; width: 880px; display: flex; align-items: center; gap: 36px; }
+      .servicio .encabezado img { height: 170px; }
+      .servicio .encabezado h2 { color: var(--dorado); font-size: 92px; }
+      .servicio p { left: 1000px; top: 640px; width: 840px; color: #fff; font-size: 40px; line-height: 1.4; text-align: center; }
+      .servicio .dots { left: 8px; top: 8px; }
+      .marca-agua { position: absolute; right: 40px; bottom: 30px; width: 130px; z-index: 3; }
+
+      /* 8. Beneficios */
+      #s-beneficios .fondo { left: 0; top: 0; width: 1920px; height: 680px; overflow: hidden; }
+      #s-beneficios .fondo img { object-position: 50% 40%; }
+      #s-beneficios .fondo::after { content: ""; position: absolute; inset: 0; background: rgba(212, 150, 44, 0.86); }
+      #s-beneficios h2 { left: 0; width: 1920px; top: 150px; text-align: center; color: #fff; font-size: 160px; z-index: 2; }
+      #s-beneficios .bajada { left: 200px; width: 1520px; top: 350px; text-align: center; color: #fff; font-size: 40px; line-height: 1.35; z-index: 2; }
+      #s-beneficios .items { left: 110px; top: 560px; width: 1700px; display: flex; gap: 40px; z-index: 2; }
+      #s-beneficios .item { flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; }
+      #s-beneficios .item .icono { width: 200px; height: 200px; border-radius: 22px; background: var(--petroleo); display: flex; align-items: center; justify-content: center; }
+      #s-beneficios .item .icono svg { width: 120px; height: 120px; }
+      #s-beneficios .item h3 { margin-top: 34px; color: var(--dorado); font-size: 40px; font-weight: 700; }
+      #s-beneficios .item p { margin-top: 16px; font-size: 32px; line-height: 1.35; }
+
+      /* 9. Metodología */
+      #s-metodo .derecha { left: 900px; top: 0; width: 1020px; height: 1080px; background: var(--petroleo); }
+      #s-metodo h2 { left: 60px; top: 220px; width: 700px; text-align: center; color: var(--dorado); font-size: 92px; }
+      #s-metodo .bajada { left: 60px; top: 520px; width: 700px; text-align: center; font-size: 40px; line-height: 1.4; }
+      #s-metodo .paso { left: 800px; width: 1080px; height: 196px; display: flex; align-items: center; }
+      #s-metodo .chevron { width: 210px; height: 196px; flex: none; clip-path: polygon(0 0, 50% 22%, 100% 0, 100% 78%, 50% 100%, 0 78%); }
+      #s-metodo .paso .txt { padding-left: 40px; color: #fff; }
+      #s-metodo .paso h3 { font-size: 40px; font-weight: 700; }
+      #s-metodo .paso p { margin-top: 8px; font-size: 28px; line-height: 1.35; opacity: .92; }
+
+      /* 10. Diferencial */
+      #s-diferencial .foto { left: 110px; top: 0; width: 1430px; height: 730px; overflow: hidden; }
+      #s-diferencial .foto img { object-position: 50% 72%; }
+      #s-diferencial .bloque { left: 1540px; top: 0; width: 380px; height: 540px; background: var(--dorado); }
+      #s-diferencial .dots { left: 1660px; top: 720px; width: 168px; --c: var(--dorado); }
+      #s-diferencial blockquote { left: 170px; top: 840px; width: 1500px; color: var(--petroleo); font-size: 58px; font-style: italic; font-weight: 400; line-height: 1.2; }
+
+      /* 11. Cierre */
+      #s-cierre .foto { left: 1190px; top: 0; width: 730px; height: 1080px; overflow: hidden; }
+      #s-cierre .foto img { object-position: 80% 50%; }
+      #s-cierre .logo { left: 760px; top: 20px; width: 340px; }
+      #s-cierre .banda { left: 0; top: 330px; width: 1190px; height: 380px; background: var(--dorado); }
+      #s-cierre .banda h2 { position: absolute; left: 80px; top: 50px; width: 1060px; color: #fff; font-size: 84px; font-weight: 700; line-height: 1.08; }
+      #s-cierre .contacto { left: 110px; top: 790px; width: 1060px; display: grid; grid-template-columns: 1fr 1fr; row-gap: 34px; column-gap: 40px; font-size: 32px; line-height: 1.35; }
+      #s-cierre .contacto b { display: block; font-size: 36px; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="45" data-width="1920" data-height="1080">
+
+      <!-- 1. Portada · 0–5 s -->
+      <section id="s-portada" class="clip" data-start="0" data-duration="5" data-track-index="0">
+        <div class="dots abs" style="left: 8px; top: 8px"></div>
+        <div class="foto abs"><img class="cover-img" src="assets/photos/diente-de-leon-azul.jpg" alt="" /></div>
+        <img class="logo abs" src="assets/brand/logo.png" alt="ABRE Integradores" />
+        <div class="banda abs"><h1>Animáte a pensar<br />en grande.</h1></div>
+        <div class="sub abs">Nosotros te acompañamos a hacerlo realidad.</div>
+      </section>
+
+      <!-- 2. Quiénes somos · 5–10 s -->
+      <section id="s-quienes" class="clip" data-start="5" data-duration="5" data-track-index="0">
+        <div class="foto abs"><img class="cover-img" src="assets/photos/equipo.jpg" alt="Equipo de ABRE Integradores" /></div>
+        <h2 class="titulo abs">Quiénes somos <img src="assets/brand/mark-blanco.png" alt="" /></h2>
+        <div class="izq abs"><p>Somos una <b>consultora orientada a impulsar a las entidades a un estadío más elevado en su desempeño.</b> Desde 2018 acompañamos a empresarios y directivos.</p></div>
+        <div class="der abs"><p><b>Profesionales con mirada objetiva y amplia experiencia</b> en gestión contable, empresarial y auditoría, para construir <b>resultados sostenibles y duraderos.</b></p></div>
+      </section>
+
+      <!-- 3. Servicios · 10–14 s -->
+      <section id="s-servicios" class="clip" data-start="10" data-duration="4" data-track-index="0">
+        <h2 class="titulo abs">Nuestros servicios</h2>
+        <p class="bajada abs">Cuatro servicios especializados que profesionalizan la gestión y potencian el crecimiento.</p>
+        <div class="base abs"></div>
+        <div class="cards abs">
+          <div class="card" style="background: var(--auditoria)"><img src="assets/brand/icon-auditoria-blanco.png" alt="" />Auditoría<br />especializada</div>
+          <div class="card" style="background: var(--tablero)"><img src="assets/brand/icon-tablero-blanco.png" alt="" />Tablero de<br />dirección</div>
+          <div class="card" style="background: var(--contable)"><img src="assets/brand/icon-contable-blanco.png" alt="" />Integración de<br />gestión contable</div>
+          <div class="card" style="background: var(--procesos)"><img src="assets/brand/icon-procesos-blanco.png" alt="" />Optimización<br />de procesos</div>
+        </div>
+        <img class="marca-agua" src="assets/brand/logo-blanco.png" alt="" />
+      </section>
+
+      <!-- 4. Auditoría · 14–17 s -->
+      <section id="s-auditoria" class="clip servicio" data-start="14" data-duration="3" data-track-index="0" style="--c: var(--auditoria)">
+        <div class="dots"></div>
+        <div class="panel abs"></div>
+        <div class="foto abs"><img class="cover-img" src="assets/photos/auditoria.jpg" alt="" /></div>
+        <div class="encabezado abs"><img src="assets/brand/icon-auditoria.png" alt="" /><h2 class="titulo">Auditoría<br />especializada</h2></div>
+        <p class="abs">La opinión de un profesional independiente brinda solidez, confianza y transparencia.</p>
+        <img class="marca-agua" src="assets/brand/logo-blanco.png" alt="" />
+      </section>
+
+      <!-- 5. Tablero · 17–20 s -->
+      <section id="s-tablero" class="clip servicio" data-start="17" data-duration="3" data-track-index="0" style="--c: var(--tablero)">
+        <div class="dots"></div>
+        <div class="panel abs"></div>
+        <div class="foto abs"><img class="cover-img" src="assets/photos/tablero.jpg" alt="" /></div>
+        <div class="encabezado abs"><img src="assets/brand/icon-tablero.png" alt="" /><h2 class="titulo">Tablero de<br />dirección</h2></div>
+        <p class="abs">Conocé el desempeño de tu negocio, evaluá objetivos y tomá decisiones con un análisis profesional e independiente.</p>
+        <img class="marca-agua" src="assets/brand/logo-blanco.png" alt="" />
+      </section>
+
+      <!-- 6. Contable · 20–23 s -->
+      <section id="s-contable" class="clip servicio" data-start="20" data-duration="3" data-track-index="0" style="--c: var(--contable)">
+        <div class="dots"></div>
+        <div class="panel abs"></div>
+        <div class="foto abs"><img class="cover-img" src="assets/photos/contable.jpg" alt="" /></div>
+        <div class="encabezado abs"><img src="assets/brand/icon-contable.png" alt="" /><h2 class="titulo">Integración de<br />gestión contable</h2></div>
+        <p class="abs">Asumimos el rol del área contable: la contabilidad transforma datos en decisiones al servicio de la Dirección.</p>
+        <img class="marca-agua" src="assets/brand/logo-blanco.png" alt="" />
+      </section>
+
+      <!-- 7. Procesos · 23–26 s -->
+      <section id="s-procesos" class="clip servicio" data-start="23" data-duration="3" data-track-index="0" style="--c: var(--procesos)">
+        <div class="dots"></div>
+        <div class="panel abs"></div>
+        <div class="foto abs"><img class="cover-img" src="assets/photos/procesos.jpg" alt="" /></div>
+        <div class="encabezado abs"><img src="assets/brand/icon-procesos.png" alt="" /><h2 class="titulo">Optimización<br />de procesos</h2></div>
+        <p class="abs">Evaluamos los procesos administrativos en búsqueda de eficiencia: riesgos, controles y tecnología.</p>
+        <img class="marca-agua" src="assets/brand/logo-blanco.png" alt="" />
+      </section>
+
+      <!-- 8. Beneficios · 26–31 s -->
+      <section id="s-beneficios" class="clip" data-start="26" data-duration="5" data-track-index="0">
+        <div class="fondo abs"><img class="cover-img" src="assets/photos/beneficios.jpg" alt="" /></div>
+        <div class="dots abs" style="left: 8px; top: 8px; --c: #ffffff"></div>
+        <h2 class="titulo abs">Beneficios</h2>
+        <p class="bajada abs">Visión estratégica, procesos claros y acompañamiento cercano.</p>
+        <div class="items abs">
+          <div class="item">
+            <div class="icono"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l4-7 4 6 3-3 3 3" /><path d="M15 11h2v-2" /><path d="M5 21v-5M9 21v-7M13 21v-5M17 21v-8M21 21v-4" /></svg></div>
+            <h3>Claridad y control</h3>
+            <p>Reportes claros e información confiable.</p>
+          </div>
+          <div class="item">
+            <div class="icono"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="11" r="7" /><path d="M10 7v4h3" /><circle cx="18" cy="18" r="4" fill="#30556d" /><path d="M18 16v2.2M18 20h.01" /></svg></div>
+            <h3>Procesos ordenados</h3>
+            <p>Eficiencia y menos riesgos.</p>
+          </div>
+          <div class="item">
+            <div class="icono"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 19v-6a6 6 0 0 1 12 0v6" /><path d="M4 21h16M12 3v2M4.5 6l1.4 1.4M19.5 6l-1.4 1.4" /><path d="M13.5 11.5c-.4-.6-1-.9-1.6-.9-.9 0-1.6.5-1.6 1.2 0 1.6 3.3.9 3.3 2.6 0 .7-.7 1.2-1.7 1.2-.7 0-1.3-.3-1.7-.9M12 9.6v1M12 15.6v1" /></svg></div>
+            <h3>Visión estratégica</h3>
+            <p>Mirar más allá del día a día.</p>
+          </div>
+          <div class="item">
+            <div class="icono"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l6 2.5v4.5c0 4-2.6 6.6-6 8-3.4-1.4-6-4-6-8V6.5z" /><path d="M9.2 11.8l2 2 3.8-3.9" /></svg></div>
+            <h3>Acompañamiento</h3>
+            <p>Un equipo experto integrado a tu empresa.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 9. Metodología · 31–36 s -->
+      <section id="s-metodo" class="clip" data-start="31" data-duration="5" data-track-index="0">
+        <div class="dots abs" style="left: 8px; top: 8px; opacity: .25"></div>
+        <div class="derecha abs"></div>
+        <h2 class="titulo abs">Nuestra<br />metodología</h2>
+        <p class="bajada abs">Somos socios estratégicos que se sumergen en la realidad de cada empresa.</p>
+        <div class="paso abs" style="top: 50px"><div class="chevron" style="background: var(--dorado)"></div><div class="txt"><h3>Diagnóstico</h3><p>Análisis profundo de la situación actual.</p></div></div>
+        <div class="paso abs" style="top: 246px"><div class="chevron" style="background: var(--amarillo)"></div><div class="txt"><h3>Personalización</h3><p>Soluciones a medida de cada empresario.</p></div></div>
+        <div class="paso abs" style="top: 442px"><div class="chevron" style="background: var(--dorado)"></div><div class="txt"><h3>Implementación</h3><p>Nos integramos al día a día operativo.</p></div></div>
+        <div class="paso abs" style="top: 638px"><div class="chevron" style="background: var(--amarillo)"></div><div class="txt"><h3>Acompañamiento</h3><p>Seguimiento permanente y ajustes.</p></div></div>
+        <div class="paso abs" style="top: 834px"><div class="chevron" style="background: var(--dorado)"></div><div class="txt"><h3>Evaluación y mejora</h3><p>Medición de resultados y optimización continua.</p></div></div>
+      </section>
+
+      <!-- 10. Diferencial · 36–39.5 s -->
+      <section id="s-diferencial" class="clip" data-start="36" data-duration="3.5" data-track-index="0">
+        <div class="foto abs"><img class="cover-img" src="assets/photos/equipo-2.jpg" alt="Equipo de ABRE Integradores" /></div>
+        <div class="bloque abs"></div>
+        <div class="dots abs"></div>
+        <blockquote class="abs">Nuestro diferencial radica en construir relaciones de confianza duraderas.</blockquote>
+        <img class="marca-agua" src="assets/brand/logo.png" alt="" />
+      </section>
+
+      <!-- 11. Cierre · 39.5–45 s -->
+      <section id="s-cierre" class="clip" data-start="39.5" data-duration="5.5" data-track-index="0">
+        <div class="foto abs"><img class="cover-img" src="assets/photos/diente-de-leon-azul.jpg" alt="" /></div>
+        <img class="logo abs" src="assets/brand/logo.png" alt="ABRE Integradores" />
+        <div class="banda abs"><h2>¿Listo para profesionalizar tu empresa y llevarla al siguiente nivel?</h2></div>
+        <div class="contacto abs">
+          <div>Web<b>www.abreintegradores.com.ar</b></div>
+          <div>Teléfono<b>+54 9 11 5008-2859</b></div>
+          <div>Email<b>info@abreintegradores.com.ar</b></div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      const tl = gsap.timeline({ paused: true });
+      const ease = "power3.out";
+
+      // 1. Portada
+      tl.fromTo("#s-portada .foto", { clipPath: "inset(0 0 0 100%)" }, { clipPath: "inset(0 0 0 0%)", duration: 1, ease: "power2.inOut" }, 0);
+      tl.fromTo("#s-portada .foto img", { scale: 1.15 }, { scale: 1, duration: 5, ease: "none" }, 0);
+      tl.fromTo("#s-portada .logo", { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 0.8, ease }, 0.3);
+      tl.fromTo("#s-portada .banda", { scaleX: 0, transformOrigin: "left center" }, { scaleX: 1, duration: 0.8, ease: "power2.inOut" }, 0.6);
+      tl.fromTo("#s-portada .banda h1", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.7, ease }, 1.2);
+      tl.fromTo("#s-portada .sub", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.7, ease }, 1.7);
+      tl.fromTo("#s-portada .dots", { opacity: 0 }, { opacity: 1, duration: 0.6 }, 0.4);
+
+      // 2. Quiénes somos
+      tl.fromTo("#s-quienes .foto img", { scale: 1.12 }, { scale: 1, duration: 5, ease: "none" }, 5);
+      tl.fromTo("#s-quienes .titulo", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.7, ease }, 5.3);
+      tl.fromTo("#s-quienes .izq p", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, ease }, 5.7);
+      tl.fromTo("#s-quienes .der", { yPercent: 100 }, { yPercent: 0, duration: 0.7, ease }, 5.5);
+      tl.fromTo("#s-quienes .der p", { opacity: 0 }, { opacity: 1, duration: 0.6 }, 6.1);
+
+      // 3. Servicios
+      tl.fromTo("#s-servicios h2", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.6, ease }, 10);
+      tl.fromTo("#s-servicios .bajada", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 10.35);
+      tl.fromTo("#s-servicios .base", { yPercent: 100 }, { yPercent: 0, duration: 0.6, ease }, 10.2);
+      tl.fromTo("#s-servicios .card", { opacity: 0, y: 80 }, { opacity: 1, y: 0, duration: 0.6, ease: "back.out(1.4)", stagger: 0.15 }, 10.6);
+
+      // 4–7. Cada servicio
+      ["auditoria", "tablero", "contable", "procesos"].forEach((id, i) => {
+        const t = 14 + i * 3;
+        const s = `#s-${id}`;
+        tl.fromTo(`${s} .panel`, { scaleX: 0, transformOrigin: "right center" }, { scaleX: 1, duration: 0.6, ease: "power2.inOut" }, t);
+        tl.fromTo(`${s} .foto`, { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: 0.7, ease }, t + 0.1);
+        tl.fromTo(`${s} .foto img`, { scale: 1.1 }, { scale: 1, duration: 3, ease: "none" }, t);
+        tl.fromTo(`${s} .encabezado img`, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.6)" }, t + 0.3);
+        tl.fromTo(`${s} .encabezado h2`, { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.6, ease }, t + 0.4);
+        tl.fromTo(`${s} p`, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease }, t + 0.7);
+      });
+
+      // 8. Beneficios
+      tl.fromTo("#s-beneficios .fondo img", { scale: 1.1 }, { scale: 1, duration: 5, ease: "none" }, 26);
+      tl.fromTo("#s-beneficios h2", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.6, ease }, 26.1);
+      tl.fromTo("#s-beneficios .bajada", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 26.5);
+      tl.fromTo("#s-beneficios .item", { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 0.6, ease, stagger: 0.25 }, 26.8);
+
+      // 9. Metodología
+      tl.fromTo("#s-metodo .derecha", { xPercent: 100 }, { xPercent: 0, duration: 0.7, ease: "power2.inOut" }, 31);
+      tl.fromTo("#s-metodo h2", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.6, ease }, 31.2);
+      tl.fromTo("#s-metodo .bajada", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 31.6);
+      tl.fromTo("#s-metodo .paso", { opacity: 0, y: -40 }, { opacity: 1, y: 0, duration: 0.5, ease, stagger: 0.4 }, 31.6);
+
+      // 10. Diferencial
+      tl.fromTo("#s-diferencial .foto", { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 0.9, ease: "power2.inOut" }, 36);
+      tl.fromTo("#s-diferencial .foto img", { scale: 1.1 }, { scale: 1, duration: 3.5, ease: "none" }, 36);
+      tl.fromTo("#s-diferencial .bloque", { yPercent: -100 }, { yPercent: 0, duration: 0.6, ease }, 36.3);
+      tl.fromTo("#s-diferencial blockquote", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8, ease }, 36.8);
+
+      // 11. Cierre
+      tl.fromTo("#s-cierre .foto", { clipPath: "inset(0 0 0 100%)" }, { clipPath: "inset(0 0 0 0%)", duration: 0.9, ease: "power2.inOut" }, 39.5);
+      tl.fromTo("#s-cierre .foto img", { scale: 1.15 }, { scale: 1, duration: 5.5, ease: "none" }, 39.5);
+      tl.fromTo("#s-cierre .logo", { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 0.7, ease }, 39.7);
+      tl.fromTo("#s-cierre .banda", { scaleX: 0, transformOrigin: "left center" }, { scaleX: 1, duration: 0.7, ease: "power2.inOut" }, 39.9);
+      tl.fromTo("#s-cierre .banda h2", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.7, ease }, 40.4);
+      tl.fromTo("#s-cierre .contacto > div", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease, stagger: 0.15 }, 40.9);
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
